@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "MathSolver Pro",
+    "slug": "mathsolver-pro",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1e40af"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mathsolverpro.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs access to camera to scan math problems.",
+        "NSPhotoLibraryUsageDescription": "This app needs access to photo library to select math problems from images."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.mathsolverpro.app",
+      "versionCode": 1,
+      "permissions": [
+        "CAMERA",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow MathSolver Pro to access your camera to scan math problems."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow MathSolver Pro to access your photos to select math problems.",
+          "savePhotosPermission": "Allow MathSolver Pro to save solved problems to your photo library.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id-here"
+      }
+    },
+    "owner": "sandy970"
+  }
+}
