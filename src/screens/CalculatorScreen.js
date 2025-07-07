@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../context/ThemeContext';
 import { useMath } from '../context/MathContext';
+import { evaluate, pi, e } from 'mathjs';
 
 const { width } = Dimensions.get('window');
 
@@ -21,6 +22,8 @@ const CalculatorScreen = () => {
   const [operation, setOperation] = useState(null);
   const [waitingForNewValue, setWaitingForNewValue] = useState(false);
   const [history, setHistory] = useState([]);
+  const [isScientific, setIsScientific] = useState(false);
+  const [angleMode, setAngleMode] = useState('deg'); // 'deg' or 'rad'
 
   const inputNumber = (num) => {
     if (waitingForNewValue) {
@@ -104,6 +107,100 @@ const CalculatorScreen = () => {
     }
   };
 
+  const handleScientificFunction = (func) => {
+    try {
+      let value = parseFloat(display);
+      let result;
+      
+      switch (func) {
+        case 'sin':
+          result = angleMode === 'deg' ? Math.sin(value * Math.PI / 180) : Math.sin(value);
+          break;
+        case 'cos':
+          result = angleMode === 'deg' ? Math.cos(value * Math.PI / 180) : Math.cos(value);
+          break;
+        case 'tan':
+          result = angleMode === 'deg' ? Math.tan(value * Math.PI / 180) : Math.tan(value);
+          break;
+        case 'asin':
+          result = angleMode === 'deg' ? Math.asin(value) * 180 / Math.PI : Math.asin(value);
+          break;
+        case 'acos':
+          result = angleMode === 'deg' ? Math.acos(value) * 180 / Math.PI : Math.acos(value);
+          break;
+        case 'atan':
+          result = angleMode === 'deg' ? Math.atan(value) * 180 / Math.PI : Math.atan(value);
+          break;
+        case 'log':
+          result = Math.log10(value);
+          break;
+        case 'ln':
+          result = Math.log(value);
+          break;
+        case 'sqrt':
+          result = Math.sqrt(value);
+          break;
+        case 'x²':
+          result = value * value;
+          break;
+        case 'x³':
+          result = value * value * value;
+          break;
+        case '1/x':
+          result = 1 / value;
+          break;
+        case 'x!':
+          result = factorial(value);
+          break;
+        case '10^x':
+          result = Math.pow(10, value);
+          break;
+        case 'e^x':
+          result = Math.exp(value);
+          break;
+        case 'π':
+          result = Math.PI;
+          break;
+        case 'e':
+          result = Math.E;
+          break;
+        default:
+          result = value;
+      }
+
+      const calculation = `${func}(${value}) = ${result}`;
+      setHistory(prev => [calculation, ...prev].slice(0, 20));
+      setDisplay(result.toString());
+      setWaitingForNewValue(true);
+    } catch (error) {
+      setDisplay('Error');
+      setWaitingForNewValue(true);
+    }
+  };
+
+  const factorial = (n) => {
+    if (n < 0) return NaN;
+    if (n === 0 || n === 1) return 1;
+    let result = 1;
+    for (let i = 2; i <= n; i++) {
+      result *= i;
+    }
+    return result;
+  };
+
+  const handleExpression = () => {
+    try {
+      const result = evaluate(display);
+      const calculation = `${display} = ${result}`;
+      setHistory(prev => [calculation, ...prev].slice(0, 20));
+      setDisplay(result.toString());
+      setWaitingForNewValue(true);
+    } catch (error) {
+      setDisplay('Error');
+      setWaitingForNewValue(true);
+    }
+  };
+
   const Button = ({ onPress, style, textStyle, children, type = 'default' }) => {
     const getButtonStyle = () => {
       switch (type) {
@@ -119,6 +216,10 @@ const CalculatorScreen = () => {
           return {
             backgroundColor: theme.colors.accent,
           };
+        case 'scientific':
+          return {
+            backgroundColor: theme.colors.success,
+          };
         default:
           return {
             backgroundColor: theme.colors.surface,
@@ -127,7 +228,7 @@ const CalculatorScreen = () => {
     };
 
     const getTextColor = () => {
-      return type === 'operator' || type === 'accent' ? 'white' : theme.colors.text;
+      return type === 'operator' || type === 'accent' || type === 'scientific' ? 'white' : theme.colors.text;
     };
 
     return (
@@ -147,7 +248,10 @@ const CalculatorScreen = () => {
         <Text
           style={[
             styles.buttonText,
-            { color: getTextColor() },
+            { 
+              color: getTextColor(),
+              fontSize: type === 'scientific' ? 12 : 18,
+            },
             textStyle,
           ]}
         >
@@ -187,62 +291,185 @@ const CalculatorScreen = () => {
           )}
         </View>
 
-        {/* Button Grid */}
-        <View style={styles.buttonGrid}>
-          {/* Row 1 */}
-          <View style={styles.buttonRow}>
-            <Button onPress={clear} type="secondary" style={styles.wideButton}>
-              Clear
-            </Button>
-            <Button onPress={deleteLast} type="secondary">
-              ⌫
-            </Button>
-            <Button onPress={() => handleOperation('÷')} type="operator">
-              ÷
-            </Button>
-          </View>
-
-          {/* Row 2 */}
-          <View style={styles.buttonRow}>
-            <Button onPress={() => inputNumber(7)}>7</Button>
-            <Button onPress={() => inputNumber(8)}>8</Button>
-            <Button onPress={() => inputNumber(9)}>9</Button>
-            <Button onPress={() => handleOperation('×')} type="operator">
-              ×
-            </Button>
-          </View>
-
-          {/* Row 3 */}
-          <View style={styles.buttonRow}>
-            <Button onPress={() => inputNumber(4)}>4</Button>
-            <Button onPress={() => inputNumber(5)}>5</Button>
-            <Button onPress={() => inputNumber(6)}>6</Button>
-            <Button onPress={() => handleOperation('-')} type="operator">
-              −
-            </Button>
-          </View>
-
-          {/* Row 4 */}
-          <View style={styles.buttonRow}>
-            <Button onPress={() => inputNumber(1)}>1</Button>
-            <Button onPress={() => inputNumber(2)}>2</Button>
-            <Button onPress={() => inputNumber(3)}>3</Button>
-            <Button onPress={() => handleOperation('+')} type="operator">
-              +
-            </Button>
-          </View>
-
-          {/* Row 5 */}
-          <View style={styles.buttonRow}>
-            <Button onPress={() => inputNumber(0)} style={styles.wideButton}>
-              0
-            </Button>
-            <Button onPress={inputDecimal}>.</Button>
-            <Button onPress={() => handleOperation('=')} type="accent">
-              =
-            </Button>
-          </View>
+        {/* Mode Toggle */}
+        <View style={styles.modeToggle}>
+          <TouchableOpacity
+            style={[
+              styles.toggleButton,
+              {
+                backgroundColor: !isScientific ? theme.colors.primary : theme.colors.surface,
+                borderColor: theme.colors.border,
+              },
+            ]}
+            onPress={() => setIsScientific(false)}
+          >
+            <Text style={[styles.toggleText, { color: !isScientific ? 'white' : theme.colors.text }]}>
+              Basic
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.toggleButton,
+              {
+                backgroundColor: isScientific ? theme.colors.primary : theme.colors.surface,
+                borderColor: theme.colors.border,
+              },
+            ]}
+            onPress={() => setIsScientific(true)}
+          >
+            <Text style={[styles.toggleText, { color: isScientific ? 'white' : theme.colors.text }]}>
+              Scientific
+            </Text>
+          </TouchableOpacity>
+          {isScientific && (
+            <TouchableOpacity
+              style={[
+                styles.angleButton,
+                { backgroundColor: theme.colors.accent, borderColor: theme.colors.border },
+              ]}
+              onPress={() => setAngleMode(angleMode === 'deg' ? 'rad' : 'deg')}
+            >
+              <Text style={[styles.toggleText, { color: 'white' }]}>
+                {angleMode.toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
+
+        {/* Button Grid */}
+        <ScrollView style={styles.buttonContainer}>
+          {!isScientific ? (
+            // Basic Calculator Layout
+            <View style={styles.buttonGrid}>
+              {/* Row 1 */}
+              <View style={styles.buttonRow}>
+                <Button onPress={clear} type="secondary" style={styles.wideButton}>
+                  Clear
+                </Button>
+                <Button onPress={deleteLast} type="secondary">
+                  ⌫
+                </Button>
+                <Button onPress={() => handleOperation('÷')} type="operator">
+                  ÷
+                </Button>
+              </View>
+
+              {/* Row 2 */}
+              <View style={styles.buttonRow}>
+                <Button onPress={() => inputNumber(7)}>7</Button>
+                <Button onPress={() => inputNumber(8)}>8</Button>
+                <Button onPress={() => inputNumber(9)}>9</Button>
+                <Button onPress={() => handleOperation('×')} type="operator">
+                  ×
+                </Button>
+              </View>
+
+              {/* Row 3 */}
+              <View style={styles.buttonRow}>
+                <Button onPress={() => inputNumber(4)}>4</Button>
+                <Button onPress={() => inputNumber(5)}>5</Button>
+                <Button onPress={() => inputNumber(6)}>6</Button>
+                <Button onPress={() => handleOperation('-')} type="operator">
+                  −
+                </Button>
+              </View>
+
+              {/* Row 4 */}
+              <View style={styles.buttonRow}>
+                <Button onPress={() => inputNumber(1)}>1</Button>
+                <Button onPress={() => inputNumber(2)}>2</Button>
+                <Button onPress={() => inputNumber(3)}>3</Button>
+                <Button onPress={() => handleOperation('+')} type="operator">
+                  +
+                </Button>
+              </View>
+
+              {/* Row 5 */}
+              <View style={styles.buttonRow}>
+                <Button onPress={() => inputNumber(0)} style={styles.wideButton}>
+                  0
+                </Button>
+                <Button onPress={inputDecimal}>.</Button>
+                <Button onPress={() => handleOperation('=')} type="accent">
+                  =
+                </Button>
+              </View>
+            </View>
+          ) : (
+            // Scientific Calculator Layout
+            <View style={styles.scientificGrid}>
+              {/* Row 1 - Functions */}
+              <View style={styles.buttonRow}>
+                <Button onPress={() => handleScientificFunction('sin')} type="scientific">sin</Button>
+                <Button onPress={() => handleScientificFunction('cos')} type="scientific">cos</Button>
+                <Button onPress={() => handleScientificFunction('tan')} type="scientific">tan</Button>
+                <Button onPress={clear} type="secondary">C</Button>
+                <Button onPress={deleteLast} type="secondary">⌫</Button>
+              </View>
+
+              {/* Row 2 - Inverse Functions */}
+              <View style={styles.buttonRow}>
+                <Button onPress={() => handleScientificFunction('asin')} type="scientific">asin</Button>
+                <Button onPress={() => handleScientificFunction('acos')} type="scientific">acos</Button>
+                <Button onPress={() => handleScientificFunction('atan')} type="scientific">atan</Button>
+                <Button onPress={() => setDisplay(display + '(')}>(</Button>
+                <Button onPress={() => setDisplay(display + ')')}>)</Button>
+              </View>
+
+              {/* Row 3 - Log and Power */}
+              <View style={styles.buttonRow}>
+                <Button onPress={() => handleScientificFunction('log')} type="scientific">log</Button>
+                <Button onPress={() => handleScientificFunction('ln')} type="scientific">ln</Button>
+                <Button onPress={() => handleScientificFunction('x²')} type="scientific">x²</Button>
+                <Button onPress={() => handleScientificFunction('x³')} type="scientific">x³</Button>
+                <Button onPress={() => handleScientificFunction('sqrt')} type="scientific">√</Button>
+              </View>
+
+              {/* Row 4 - Constants and Operations */}
+              <View style={styles.buttonRow}>
+                <Button onPress={() => handleScientificFunction('π')} type="scientific">π</Button>
+                <Button onPress={() => handleScientificFunction('e')} type="scientific">e</Button>
+                <Button onPress={() => handleScientificFunction('x!')} type="scientific">x!</Button>
+                <Button onPress={() => handleScientificFunction('1/x')} type="scientific">1/x</Button>
+                <Button onPress={() => handleOperation('÷')} type="operator">÷</Button>
+              </View>
+
+              {/* Row 5 - Numbers */}
+              <View style={styles.buttonRow}>
+                <Button onPress={() => inputNumber(7)}>7</Button>
+                <Button onPress={() => inputNumber(8)}>8</Button>
+                <Button onPress={() => inputNumber(9)}>9</Button>
+                <Button onPress={() => handleOperation('×')} type="operator">×</Button>
+                <Button onPress={() => handleScientificFunction('10^x')} type="scientific">10^x</Button>
+              </View>
+
+              {/* Row 6 */}
+              <View style={styles.buttonRow}>
+                <Button onPress={() => inputNumber(4)}>4</Button>
+                <Button onPress={() => inputNumber(5)}>5</Button>
+                <Button onPress={() => inputNumber(6)}>6</Button>
+                <Button onPress={() => handleOperation('-')} type="operator">−</Button>
+                <Button onPress={() => handleScientificFunction('e^x')} type="scientific">e^x</Button>
+              </View>
+
+              {/* Row 7 */}
+              <View style={styles.buttonRow}>
+                <Button onPress={() => inputNumber(1)}>1</Button>
+                <Button onPress={() => inputNumber(2)}>2</Button>
+                <Button onPress={() => inputNumber(3)}>3</Button>
+                <Button onPress={() => handleOperation('+')} type="operator">+</Button>
+                <Button onPress={handleExpression} type="accent">EXP</Button>
+              </View>
+
+              {/* Row 8 */}
+              <View style={styles.buttonRow}>
+                <Button onPress={() => inputNumber(0)} style={styles.wideButton}>0</Button>
+                <Button onPress={inputDecimal}>.</Button>
+                <Button onPress={() => handleOperation('=')} type="accent">=</Button>
+              </View>
+            </View>
+          )}
+        </ScrollView>
 
         {/* History Section */}
         {history.length > 0 && (
@@ -284,8 +511,8 @@ const styles = StyleSheet.create({
   displayContainer: {
     borderRadius: 16,
     padding: 20,
-    marginBottom: 20,
-    minHeight: 120,
+    marginBottom: 16,
+    minHeight: 100,
     justifyContent: 'center',
   },
   displayScroll: {
@@ -294,7 +521,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   display: {
-    fontSize: 48,
+    fontSize: 36,
     fontWeight: 'bold',
     textAlign: 'right',
   },
@@ -303,35 +530,65 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginTop: 8,
   },
-  buttonGrid: {
+  modeToggle: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    gap: 8,
+  },
+  toggleButton: {
     flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  angleButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  toggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  buttonContainer: {
+    flex: 1,
+  },
+  buttonGrid: {
     gap: 12,
+  },
+  scientificGrid: {
+    gap: 8,
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: 12,
-    flex: 1,
+    gap: 8,
   },
   button: {
     flex: 1,
-    borderRadius: 16,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    minHeight: 60,
+    minHeight: 50,
+    paddingHorizontal: 4,
   },
   wideButton: {
     flex: 2,
   },
   buttonText: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: '600',
+    textAlign: 'center',
   },
   historyContainer: {
     borderRadius: 16,
     padding: 16,
     marginTop: 16,
-    maxHeight: 150,
+    maxHeight: 120,
   },
   historyTitle: {
     fontSize: 16,
@@ -342,11 +599,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   historyItem: {
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderBottomWidth: 1,
   },
   historyText: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'monospace',
   },
 });
