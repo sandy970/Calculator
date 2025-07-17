@@ -1,173 +1,259 @@
-# Advanced Calculator
+# Job Dashboard Backend API
 
-A comprehensive calculator application with multiple modes including basic arithmetic, scientific functions, unit conversions, mathematical formula evaluation, and text generation utilities.
+A FastAPI-based backend service that scrapes job listings from popular job boards (LinkedIn, Indeed) and provides REST API endpoints for different engineering roles.
 
 ## Features
 
-### 🧮 Basic Calculator
-- Standard arithmetic operations (+, -, ×, ÷)
-- Decimal point support
-- Clear and backspace functionality
-- Responsive button layout
+- 🔍 **Web Scraping**: Extracts job listings from LinkedIn and Indeed
+- 🚀 **FastAPI**: Modern, fast web framework with automatic API documentation
+- 🎯 **Multiple Job Categories**: Dedicated endpoints for software, security, and data engineers
+- 🛡️ **Error Handling**: Robust error handling and logging
+- 📊 **Database Ready**: Placeholder for database integration with duplicate prevention
+- 🔄 **Async Support**: Non-blocking operations for better performance
+- 📝 **Type Safety**: Full Pydantic model validation and type hints
 
-### 🔬 Scientific Calculator
-- Trigonometric functions (sin, cos, tan, etc.)
-- Logarithmic functions (log, ln)
-- Mathematical constants (π, e)
-- Power and root operations
-- Calculation history
-- Support for complex expressions
+## API Endpoints
 
-### 📐 Formula Calculator
-- Input custom mathematical formulas
-- Variable substitution
-- LaTeX formula rendering
-- Pre-built common formulas:
-  - Quadratic Formula
-  - Distance Formula
-  - Area and Volume calculations
-  - Compound Interest
-  - Pythagorean Theorem
-- Save and load custom formulas
+### Core Endpoints
 
-### 🔄 Unit Converter
-- **Length**: meter, kilometer, inch, foot, yard, mile, etc.
-- **Weight**: kilogram, gram, pound, ounce, ton, stone
-- **Temperature**: Celsius, Fahrenheit, Kelvin
-- **Volume**: liter, gallon, quart, pint, cup, fluid ounce
-- **Area**: square meter, acre, hectare, square foot, etc.
-- **Time**: second, minute, hour, day, week, month, year
-- Quick conversion references
-- Swap units functionality
+- `GET /` - API information and available endpoints
+- `GET /health` - Health check endpoint
+- `GET /docs` - Interactive API documentation (Swagger UI)
+- `GET /redoc` - Alternative API documentation
 
-### 📝 Text Generator
-- **Password Generator**: Customizable length and character types
-- **Hash Generator**: Simple text hashing
-- **Case Converter**: UPPER, lower, Title Case, camelCase, snake_case, kebab-case
-- **Lorem Ipsum Generator**: Placeholder text generation
-- **Random Text Generator**: Various random text types
-- **Text Analysis**: Word count, character analysis, reading time estimation
+### Job Scraping Endpoints
 
-## Technology Stack
+- `GET /jobs/software-engineer` - Scrape Full Stack Java Engineer positions
+- `GET /jobs/security-engineer` - Scrape Cybersecurity Engineer positions  
+- `GET /jobs/data-engineer` - Scrape Data Engineer positions
 
-- **Frontend**: React 18
-- **Styling**: Tailwind CSS
-- **Mathematics**: Math.js for advanced calculations
-- **LaTeX Rendering**: KaTeX and react-katex
-- **Icons**: Lucide React
-- **Build Tool**: Create React App
+### Query Parameters
 
-## Installation
+All job endpoints support:
+- `location` (string, optional): Geographic location to search (default: "United States")
+- `source` (string, optional): Job board to scrape from - "linkedin" or "indeed" (default: "linkedin")
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/advanced-calculator.git
-   cd advanced-calculator
-   ```
+### Example Requests
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+```bash
+# Get software engineer jobs in New York from LinkedIn
+curl "http://localhost:8000/jobs/software-engineer?location=New York&source=linkedin"
 
-3. **Start the development server:**
-   ```bash
-   npm start
-   ```
+# Get security engineer jobs from Indeed
+curl "http://localhost:8000/jobs/security-engineer?source=indeed"
 
-4. **Open your browser:**
-   Navigate to `http://localhost:3000`
-
-## Usage
-
-### Basic Calculator
-- Click numbers and operators to build expressions
-- Use the equals button to calculate results
-- Clear button resets the calculator
-- Delete button removes the last character
-
-### Scientific Calculator
-- Use function buttons (sin, cos, log, etc.) to add mathematical functions
-- Mathematical constants (π, e) are available
-- Supports complex expressions with parentheses
-- View calculation history on the right panel
-
-### Formula Calculator
-- Enter mathematical formulas using standard notation
-- Variables are automatically detected and input fields are created
-- Use the formula library to load common formulas
-- Save frequently used formulas for later use
-
-### Unit Converter
-- Select a category (Length, Weight, Temperature, etc.)
-- Choose source and target units
-- Enter a value and click Convert
-- Use the swap button to reverse the conversion
-
-### Text Generator
-- Choose from various text generation and manipulation tools
-- Generate secure passwords with customizable options
-- Convert text between different case formats
-- Analyze text for statistics and properties
-
-## Development
-
-### Project Structure
-```
-src/
-├── components/
-│   ├── BasicCalculator.js
-│   ├── ScientificCalculator.js
-│   ├── FormulaCalculator.js
-│   ├── UnitConverter.js
-│   └── TextGenerator.js
-├── App.js
-├── index.js
-└── index.css
+# Get data engineer jobs with default parameters
+curl "http://localhost:8000/jobs/data-engineer"
 ```
 
-### Available Scripts
+## Installation & Setup
 
-- `npm start`: Runs the app in development mode
-- `npm test`: Launches the test runner
-- `npm run build`: Builds the app for production
-- `npm run eject`: Ejects from Create React App (irreversible)
+### Prerequisites
+
+- Python 3.8+
+- pip package manager
+
+### 1. Clone/Download the Code
+
+Save the following files in your project directory:
+- `main.py` - Main FastAPI application
+- `requirements.txt` - Python dependencies
+- `test_api.py` - Test suite
+
+### 2. Install Dependencies
+
+```bash
+# Create virtual environment (recommended)
+python -m venv job-dashboard-env
+
+# Activate virtual environment
+# On Windows:
+job-dashboard-env\Scripts\activate
+# On macOS/Linux:
+source job-dashboard-env/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 3. Run the Application
+
+```bash
+# Start the server
+python main.py
+
+# Or use uvicorn directly
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+The API will be available at:
+- **API Base URL**: http://localhost:8000
+- **Interactive Docs**: http://localhost:8000/docs
+- **Alternative Docs**: http://localhost:8000/redoc
+
+## Response Format
+
+All job endpoints return a standardized response:
+
+```json
+{
+  "success": true,
+  "job_count": 15,
+  "jobs": [
+    {
+      "job_title": "Senior Full Stack Developer",
+      "company_name": "Tech Corp",
+      "location": "San Francisco, CA",
+      "job_url": "https://www.linkedin.com/jobs/view/123456789",
+      "scraped_from": "LinkedIn"
+    }
+  ],
+  "message": "Successfully scraped 15 software engineer jobs"
+}
+```
+
+## Testing
+
+### Run Tests
+
+```bash
+# Using pytest
+pytest test_api.py -v
+
+# Or run the test file directly
+python test_api.py
+```
+
+### Manual Testing
+
+1. Start the server: `python main.py`
+2. Visit http://localhost:8000/docs for interactive testing
+3. Try the endpoints with different parameters
+
+## Database Integration
+
+The code includes a `DatabaseManager` class with placeholders for database operations:
+
+```python
+class DatabaseManager:
+    @staticmethod
+    async def save_jobs(jobs: List[JobListing]) -> int:
+        # TODO: Implement actual database logic
+        # 1. Connect to database (PostgreSQL, etc.)
+        # 2. Check for existing jobs using job_url as unique identifier  
+        # 3. Insert only new jobs
+        # 4. Return count of newly inserted jobs
+        pass
+```
+
+### Recommended Database Setup (Supabase/PostgreSQL)
+
+```sql
+-- Example table schema
+CREATE TABLE jobs (
+    id SERIAL PRIMARY KEY,
+    job_title VARCHAR(255) NOT NULL,
+    company_name VARCHAR(255) NOT NULL,
+    location VARCHAR(255),
+    job_url VARCHAR(500) UNIQUE NOT NULL,
+    scraped_from VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Index for faster duplicate checking
+CREATE INDEX idx_jobs_url ON jobs(job_url);
+```
+
+## Configuration
+
+### Environment Variables (Optional)
+
+Create a `.env` file for configuration:
+
+```env
+# API Configuration
+API_HOST=0.0.0.0
+API_PORT=8000
+DEBUG=True
+
+# Database Configuration (when implemented)
+DATABASE_URL=postgresql://user:password@localhost:5432/jobdashboard
+
+# Scraping Configuration
+REQUEST_TIMEOUT=30
+MAX_JOBS_PER_REQUEST=50
+```
+
+### Customizing Job Search Terms
+
+Edit the job titles in the endpoint functions:
+
+```python
+# In main.py, modify these lines:
+job_title = "Full Stack Java Engineer"  # Software engineer endpoint
+job_title = "Cybersecurity Engineer"    # Security engineer endpoint  
+job_title = "Data Engineer"             # Data engineer endpoint
+```
+
+## Production Deployment
+
+### Using Docker
+
+Create a `Dockerfile`:
+
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY . .
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+### Deploy to Cloud Platforms
+
+- **Railway**: Connect GitHub repo, automatic deployment
+- **Render**: Deploy from GitHub with build command `pip install -r requirements.txt`
+- **Fly.io**: Use `flyctl deploy` after setup
+- **Heroku**: Use Procfile: `web: uvicorn main:app --host=0.0.0.0 --port=${PORT:-5000}`
+
+## Important Notes
+
+### Web Scraping Considerations
+
+1. **Rate Limiting**: The scraper includes delays and proper headers to avoid being blocked
+2. **Legal Compliance**: Ensure you comply with websites' Terms of Service and robots.txt
+3. **Reliability**: Job board HTML structures change frequently; monitor for parsing errors
+4. **IP Blocking**: Consider using proxies or rotation for high-volume scraping
+
+### Error Handling
+
+The API handles common scenarios:
+- Network timeouts (408 error)
+- HTTP errors (4xx/5xx status codes)
+- Parsing failures (graceful degradation)
+- Missing job elements (continues with next job)
+
+### Performance Tips
+
+1. Use the async/await pattern throughout
+2. Implement caching for frequently requested locations
+3. Add database connection pooling when implementing persistence
+4. Consider background task queues (Celery) for large scraping jobs
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Follow PEP 8 style guidelines
+2. Add type hints to all functions
+3. Include comprehensive error handling
+4. Write tests for new features
+5. Update documentation
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Screenshots
-
-The application features a modern, responsive design with:
-- Clean, intuitive interface
-- Dark/light theme support
-- Responsive layout for mobile and desktop
-- Smooth animations and transitions
-- Accessible button layouts
-
-## Future Enhancements
-
-- [ ] Scientific graphing capabilities
-- [ ] More unit conversion categories
-- [ ] Export calculation history
-- [ ] Keyboard shortcuts
-- [ ] Theme customization
-- [ ] More text analysis features
-- [ ] Formula sharing functionality
-
-## Support
-
-If you encounter any issues or have questions, please open an issue on GitHub or contact the development team.
-
----
-
-Built with ❤️ using React, Tailwind CSS, and Math.js
+This project is for educational purposes. Ensure compliance with job board terms of service when scraping.
